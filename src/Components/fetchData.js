@@ -25,7 +25,7 @@ class Fetch extends Component {
     componentDidMount() {
 
 
-        navigator.geolocation.watchPosition(function (position) {
+        navigator.geolocation.watchPosition((position) => {
             const lat = position.coords.latitude;
             const long = position.coords.longitude;
             console.log(position)
@@ -48,7 +48,7 @@ class Fetch extends Component {
                 })
         },
              (error) => {
-                console.log(this)
+                 
                 if (error.code === error.PERMISSION_DENIED)
                     this.setState({
                         denied: true
@@ -137,8 +137,8 @@ class Fetch extends Component {
                 ) : (this.state.denied) ?
 
                     (
-                        <div>
-                            <p>you denied me</p>
+                        <div className="loading">
+                            <p>Can not load weather for your location if permssion is denied</p>
                         </div>
                     ) :
                         (
