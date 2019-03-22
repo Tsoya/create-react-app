@@ -14,7 +14,8 @@ class Fetch extends Component {
             sunset: '',
             temperature: '',
             isFar: false,
-            tempforweek: ''
+            tempforweek: '',
+            denied: false
         }
 
         this.onClick = this.onClick.bind(this);
@@ -23,7 +24,8 @@ class Fetch extends Component {
 
     componentDidMount() {
 
-        navigator.geolocation.getCurrentPosition((position) => {
+
+        navigator.geolocation.watchPosition(function (position) {
             const lat = position.coords.latitude;
             const long = position.coords.longitude;
             console.log(position)
@@ -42,11 +44,17 @@ class Fetch extends Component {
                         temperature: res.currently.temperature,
                         tempforweek: res.daily.data,
                         isFar: true
-
                     })
-
                 })
-        })
+        },
+             (error) => {
+                console.log(this)
+                if (error.code === error.PERMISSION_DENIED)
+                    this.setState({
+                        denied: true
+                    })
+                    
+            });
 
 
     }
@@ -67,19 +75,19 @@ class Fetch extends Component {
     createWeekOverview() {
         let allWeeks = []
         for (let i = 1; i < 6; i++) {
-        
-            allWeeks.push (
-            <div className="overview" key={i}>
-                <h2>{new Date(this.state.tempforweek[i].time * 1000).toString()} </h2>
-                <h3>Short overview</h3>
-                <p>{this.state.tempforweek[i].summary} </p>
 
-                {(this.state.isFar) ? (
-                    <p>Temperature: {this.state.tempforweek[i].temperatureLow} Farenheit</p>
-                ) : (
-                        <p>Temperature: {Math.floor((this.state.tempforweek[i].temperatureLow - 32) / 1.8)} Celcius</p>
-                    )}
-            </div>
+            allWeeks.push(
+                <div className="overview" key={i}>
+                    <h2>{new Date(this.state.tempforweek[i].time * 1000).toString()} </h2>
+                    <h3>Short overview</h3>
+                    <p>{this.state.tempforweek[i].summary} </p>
+
+                    {(this.state.isFar) ? (
+                        <p>Temperature: {this.state.tempforweek[i].temperatureLow} Farenheit</p>
+                    ) : (
+                            <p>Temperature: {Math.floor((this.state.tempforweek[i].temperatureLow - 32) / 1.8)} Celcius</p>
+                        )}
+                </div>
             )
         }
         return allWeeks;
@@ -90,46 +98,56 @@ class Fetch extends Component {
 
         return (
 
-            (this.state.isLoaded) ? (
-                <div>
-                    <div className="todaysWeather">
-                        <h2>Weather for: {this.state.timezone}</h2>
-                        <button onClick={this.onClick}>Celcius</button>
-                        <button onClick={this.onClick1}>Farenheit</button>
-                        <h3>Todays weather</h3>
+            (this.state.isLoaded) ?
+                (
+                    <div>
+                        <div className="todaysWeather">
+                            <h2>Weather for: {this.state.timezone}</h2>
+                            <button onClick={this.onClick}>Celcius</button>
+                            <button onClick={this.onClick1}>Farenheit</button>
+                            <h3>Todays weather</h3>
 
-                        {(this.state.isFar) ? (
-                            <p>Temperature: {this.state.temperature} Farenheit</p>
-                        ) : (
-                                <p>Temperature: {Math.floor((this.state.temperature - 32) / 1.8)} Celcius</p>
-                            )}
+                            {(this.state.isFar) ? (
+                                <p>Temperature: {this.state.temperature} Farenheit</p>
+                            ) : (
+                                    <p>Temperature: {Math.floor((this.state.temperature - 32) / 1.8)} Celcius</p>
+                                )}
 
 
-                        <p>Wind Speed: {this.state.items.windSpeed} MPH</p>
-                        <p>Wind Gust: {this.state.items.windGust} MPH</p>
-                        <p>Sunrise: {this.state.sunrise.toString()} </p>
-                        <p>Sunset: {this.state.sunset.toString()} </p>
+                            <p>Wind Speed: {this.state.items.windSpeed} MPH</p>
+                            <p>Wind Gust: {this.state.items.windGust} MPH</p>
+                            <p>Sunrise: {this.state.sunrise.toString()} </p>
+                            <p>Sunset: {this.state.sunset.toString()} </p>
+
+                        </div>
+
+
+
+
+                        <div className="weekoverview">
+
+                            {this.createWeekOverview()}
+
+
+                        </div>
 
                     </div>
 
 
+                ) : (this.state.denied) ?
+
+                    (
+                        <div>
+                            <p>you denied me</p>
+                        </div>
+                    ) :
+                        (
+                            <div className="loading">
+                                <p>Loading weather for your location ...</p>
+                            </div>
+                        )
 
 
-                    <div className="weekoverview">
-
-                        {this.createWeekOverview()}
-
-
-                    </div>
-
-                </div>
-
-
-            ) : (
-                    <div className="loading">
-                        <p>Loading weather for your location ...</p>
-                    </div>
-                )
 
         )
     }
