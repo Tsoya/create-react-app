@@ -25,7 +25,7 @@ class Fetch extends Component {
     componentDidMount() {
 
 
-        navigator.geolocation.watchPosition((position) => {
+        navigator.geolocation.getCurrentPosition((position) => {
             const lat = position.coords.latitude;
             const long = position.coords.longitude;
             console.log(position)
